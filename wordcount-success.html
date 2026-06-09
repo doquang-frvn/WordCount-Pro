@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to WordCount Pro 📝</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #0a0f1a; --card: #1a1f2e; --card2: #232a3b;
+  --violet: #7c3aed; --lav: #a78bfa; --amber: #fbbf24;
+  --mint: #34d399; --text: #e8e4ff; --dim: #6b7280;
+  --border: rgba(124,58,237,0.15);
+}
+body {
+  background: var(--ink); color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.glow { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; }
+.g1 { width: 500px; height: 500px; background: var(--violet); opacity: 0.06; top: -150px; left: 50%; transform: translateX(-50%); }
+.g2 { width: 300px; height: 300px; background: var(--amber); opacity: 0.05; bottom: 10%; right: 10%; }
+
+.card {
+  position: relative; z-index: 1;
+  background: var(--card);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 24px; padding: 52px 44px;
+  max-width: 480px; width: 100%;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+.check-circle {
+  width: 68px; height: 68px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--lav));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 22px;
+  animation: pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(124,58,237,0.1);
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: 100px; padding: 5px 14px;
+  font-size: 0.75rem; color: var(--lav);
+  font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 16px;
+}
+
+h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800; font-size: 1.9rem;
+  letter-spacing: -0.03em; line-height: 1.15;
+  margin-bottom: 12px;
+}
+h1 span {
+  background: linear-gradient(135deg, var(--lav), var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sub { color: var(--dim); font-size: 0.92rem; line-height: 1.7; margin-bottom: 32px; }
+
+.steps {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px;
+  margin-bottom: 28px; text-align: left;
+}
+.step { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.step:last-child { margin-bottom: 0; }
+.step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(124,58,237,0.12);
+  border: 1px solid rgba(124,58,237,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; color: var(--lav);
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: 0.86rem; color: var(--dim); line-height: 1.55; }
+.step-text strong { color: var(--text); font-weight: 600; }
+.step-text code {
+  background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.2);
+  color: var(--lav); font-size: 0.8rem; padding: 1px 7px; border-radius: 5px;
+}
+
+.btn-primary {
+  display: block; width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--violet), var(--lav));
+  color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 0.92rem; border-radius: 100px;
+  text-decoration: none; border: none; cursor: pointer;
+  box-shadow: 0 0 28px rgba(124,58,237,0.25);
+  transition: transform 0.2s, opacity 0.2s;
+  margin-bottom: 10px;
+}
+.btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
+
+.btn-ghost {
+  display: block; width: 100%; padding: 13px;
+  border: 1px solid var(--border); color: var(--dim);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600; font-size: 0.88rem; border-radius: 100px;
+  text-decoration: none; text-align: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost:hover { border-color: var(--lav); color: var(--lav); }
+
+.support-note { margin-top: 22px; font-size: 0.76rem; color: var(--dim); }
+.support-note a { color: var(--lav); text-decoration: none; }
+.support-note a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+
+<div class="card">
+  <div class="check-circle">✓</div>
+  <div class="badge">📝 WordCount Pro</div>
+  <h1>You're all set,<br><span>welcome to Pro!</span></h1>
+  <p class="sub">Payment confirmed. Your WordCount Pro subscription is now active. Here's how to get started:</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>Install WordCount Pro</strong> from the Chrome Web Store if you haven't already.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>Click the extension icon</strong> in your Chrome toolbar → go to the <code>✦ Pro</code> tab.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>Enter your email</strong> (<code id="emailDisplay">the one you used to purchase</code>) → click <strong>Activate Pro</strong>. All Pro features unlock instantly.
+      </div>
+    </div>
+  </div>
+
+  <a href="https://chromewebstore.google.com" target="_blank" class="btn-primary">
+    📝 Open Chrome Web Store
+  </a>
+  <a href="/" class="btn-ghost">← Back to WordCount Pro</a>
+
+  <div class="support-note">
+    Questions? Email us at <a href="mailto:support@clingogo.com">support@clingogo.com</a>
+  </div>
+</div>
+
+<script>
+// Show customer email from Polar redirect URL if available
+const params = new URLSearchParams(window.location.search);
+const token = params.get('customer_session_token');
+if (token) {
+  // Token present = successful checkout, nothing else needed
+  document.getElementById('emailDisplay').textContent = 'the email you used to purchase';
+}
+</script>
+</body>
+</html>
