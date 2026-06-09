@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordCount Pro — Text Stats & SEO for Chrome</title>
+<meta name="description" content="Instant word count, readability score, SEO keyword density, and daily writing goals. The smarter word counter for Chrome.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink:      #0a0f1a;
+  --ink2:     #111827;
+  --surface:  #1a1f2e;
+  --surface2: #232a3b;
+  --violet:   #7c3aed;
+  --lav:      #a78bfa;
+  --amber:    #fbbf24;
+  --mint:     #34d399;
+  --text:     #e8e4ff;
+  --dim:      #6b7280;
+  --border:   rgba(124,58,237,0.15);
+  --r:        14px;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* AMBIENT */
+.ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.orb { position: absolute; border-radius: 50%; filter: blur(120px); }
+.o1 { width: 700px; height: 700px; background: var(--violet); opacity: 0.06; top: -200px; right: -100px; }
+.o2 { width: 400px; height: 400px; background: var(--amber); opacity: 0.04; bottom: 15%; left: -80px; }
+.o3 { width: 300px; height: 300px; background: var(--lav); opacity: 0.05; top: 55%; right: 15%; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 56px;
+  background: rgba(10,15,26,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--violet), var(--lav));
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.logo-text {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800; font-size: 1.05rem; color: #fff;
+}
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a { color: var(--dim); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--lav); }
+.nav-cta {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, var(--violet), var(--lav));
+  color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 0.85rem; border-radius: 100px;
+  text-decoration: none; transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 0 24px rgba(124,58,237,0.3);
+}
+.nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+/* HERO */
+.hero {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto;
+  padding: 90px 56px 70px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: center;
+}
+.hero-kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.25);
+  border-radius: 100px; padding: 6px 14px;
+  font-size: 0.78rem; color: var(--lav);
+  font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 22px;
+}
+.hero h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.03em; margin-bottom: 20px;
+}
+.hero h1 .grad {
+  background: linear-gradient(135deg, var(--lav) 0%, var(--amber) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub { color: var(--dim); font-size: 1.05rem; max-width: 460px; margin-bottom: 32px; line-height: 1.75; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--violet), var(--lav));
+  color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 0.92rem; border-radius: 100px;
+  text-decoration: none; border: none; cursor: pointer;
+  box-shadow: 0 0 28px rgba(124,58,237,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(124,58,237,0.5); }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 24px;
+  border: 1px solid var(--border); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600; font-size: 0.92rem; border-radius: 100px;
+  text-decoration: none; transition: border-color 0.2s, color 0.2s;
+}
+.btn-ghost:hover { border-color: var(--lav); color: var(--lav); }
+
+.hero-proof { display: flex; align-items: center; gap: 12px; font-size: 0.82rem; color: var(--dim); }
+.proof-stars { color: var(--amber); font-size: 0.78rem; }
+
+/* LIVE DEMO */
+.demo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+.demo-header {
+  background: var(--surface2); padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.demo-dots { display: flex; gap: 6px; }
+.demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+.demo-title { font-size: 11px; color: var(--dim); font-weight: 600; letter-spacing: 0.04em; margin-left: 4px; }
+.demo-badge {
+  margin-left: auto;
+  background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+  color: var(--lav); font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 100px;
+}
+.demo-textarea {
+  width: 100%; padding: 16px;
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 13px; line-height: 1.6; resize: none;
+  min-height: 110px;
+}
+.demo-textarea::placeholder { color: var(--dim); }
+.demo-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+}
+.demo-stat {
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.demo-stat:last-child { border-right: none; }
+.ds-val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.4rem; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+.ds-label { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+.demo-readability {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.read-bar-bg { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.read-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
+.read-label { font-size: 10px; font-weight: 700; min-width: 80px; text-align: right; }
+
+/* STATS STRIP */
+.stats-strip {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 56px 80px;
+}
+.stats-inner {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border: 1px solid var(--border); border-radius: var(--r);
+  overflow: hidden; gap: 1px; background: var(--border);
+}
+.stat-item { background: var(--ink2); padding: 28px 24px; text-align: center; }
+.stat-n {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg, var(--lav), var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 6px;
+}
+.stat-l { font-size: 0.8rem; color: var(--dim); }
+
+/* SECTIONS */
+.section { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 56px 100px; }
+.section-head { text-align: center; margin-bottom: 56px; }
+.eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--lav); font-weight: 600; margin-bottom: 12px; }
+.section-h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+  font-size: clamp(1.8rem, 3vw, 2.6rem); letter-spacing: -0.03em; margin-bottom: 12px;
+}
+.section-sub { color: var(--dim); font-size: 0.95rem; max-width: 480px; margin: 0 auto; }
+
+/* FEATURES */
+.features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.feat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 28px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.feat:hover { border-color: rgba(124,58,237,0.35); transform: translateY(-3px); }
+.feat-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: rgba(124,58,237,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; margin-bottom: 16px;
+}
+.feat h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.98rem; margin-bottom: 8px; }
+.feat p { font-size: 0.85rem; color: var(--dim); line-height: 1.65; }
+.feat .pro-tag {
+  display: inline-block; background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.25); color: var(--amber);
+  font-size: 9px; font-weight: 700; padding: 2px 8px;
+  border-radius: 100px; letter-spacing: 0.05em;
+  margin-top: 10px;
+}
+
+/* COMPARE */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.compare-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 28px; position: relative;
+}
+.compare-card.ours {
+  border-color: rgba(124,58,237,0.3);
+  background: linear-gradient(135deg, var(--surface), #1e1535);
+}
+.compare-card.ours::before {
+  content: 'WordCount Pro';
+  position: absolute; top: -1px; left: 28px;
+  background: linear-gradient(135deg, var(--violet), var(--lav));
+  color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 0.72rem;
+  padding: 4px 12px; border-radius: 0 0 8px 8px;
+}
+.compare-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 18px; padding-top: 10px; }
+.compare-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.compare-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; line-height: 1.5; }
+.ck { color: var(--lav); flex-shrink: 0; }
+.cx { color: #f87171; flex-shrink: 0; }
+
+/* PRICING */
+.pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 720px; margin: 0 auto; }
+.plan { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px 28px; }
+.plan.pro {
+  background: linear-gradient(160deg, #1a1535 0%, #1e1a3a 100%);
+  border-color: rgba(124,58,237,0.3); position: relative; overflow: hidden;
+}
+.plan.pro::after {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(var(--violet), transparent 70%);
+  opacity: 0.12; pointer-events: none;
+}
+.plan-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--violet), var(--lav));
+  color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.7rem; font-weight: 700;
+  padding: 4px 12px; border-radius: 100px; margin-bottom: 18px;
+}
+.plan-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; }
+.plan-price {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+  font-size: 2.8rem; line-height: 1; margin-bottom: 4px;
+}
+.plan.pro .plan-price {
+  background: linear-gradient(135deg, var(--lav), var(--amber));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.plan-period { font-size: 0.82rem; color: var(--dim); margin-bottom: 24px; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 24px; }
+.plan-features li { display: flex; align-items: flex-start; gap: 8px; font-size: 0.86rem; line-height: 1.5; }
+.plan-features li .ck { color: var(--lav); }
+.plan-features li .dim-ck { color: var(--dim); }
+.plan-btn {
+  display: block; text-align: center; padding: 13px;
+  border-radius: 100px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 0.9rem; text-decoration: none;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.plan-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+.free-btn { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.pro-btn {
+  background: linear-gradient(135deg, var(--violet), var(--lav)); color: #fff;
+  box-shadow: 0 0 28px rgba(124,58,237,0.25);
+}
+
+/* CTA */
+.cta-card {
+  background: linear-gradient(135deg, var(--surface) 0%, #1a1535 50%, var(--surface) 100%);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 24px; padding: 68px 56px; text-align: center; position: relative; overflow: hidden;
+}
+.cta-card::before { content: '📝'; position: absolute; font-size: 200px; opacity: 0.03; top: -40px; right: -20px; pointer-events: none; }
+.cta-card h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(1.8rem, 3vw, 2.8rem); letter-spacing: -0.03em; margin-bottom: 14px; }
+.cta-card p { color: var(--dim); max-width: 420px; margin: 0 auto 32px; }
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.cta-note { margin-top: 14px; font-size: 0.78rem; color: var(--dim); }
+
+/* FOOTER */
+footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--border);
+  max-width: 1200px; margin: 0 auto;
+  padding: 36px 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-logo { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; color: #fff; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+.footer-links { display: flex; gap: 22px; }
+.footer-links a { color: var(--dim); text-decoration: none; font-size: 0.83rem; transition: color 0.2s; }
+.footer-links a:hover { color: var(--lav); }
+.footer-copy { font-size: 0.8rem; color: var(--dim); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  .hero, .stats-strip, .section { padding-left: 20px; padding-right: 20px; }
+  .hero { grid-template-columns: 1fr; padding-top: 48px; gap: 36px; }
+  .stats-inner { grid-template-columns: repeat(2,1fr); }
+  .features-grid, .compare-grid, .pricing-grid { grid-template-columns: 1fr; }
+  .cta-card { padding: 48px 24px; }
+  footer { flex-direction: column; gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">📝</div>
+    <div class="logo-text">WordCount Pro</div>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#compare">Compare</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://clingogo.com">By Clingogo</a>
+  </div>
+  <a href="#pricing" class="nav-cta">Get Pro — $3.99/mo</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-kicker">✦ Chrome Extension · Free + Pro</div>
+    <h1>Count words.<br><span class="grad">Understand text.</span><br>Write better.</h1>
+    <p class="hero-sub">Select any text on any page — instantly see words, characters, sentences, readability score, and SEO keyword density. The word counter that actually helps you write.</p>
+    <div class="hero-actions">
+      <a href="https://chromewebstore.google.com" target="_blank" class="btn-primary">
+        📝 Add to Chrome — Free
+      </a>
+      <a href="#pricing" class="btn-ghost">See Pro features</a>
+    </div>
+    <div class="hero-proof">
+      <div class="proof-stars">★★★★★</div>
+      <span>Built for writers, bloggers & SEO professionals</span>
+    </div>
+  </div>
+
+  <!-- LIVE DEMO -->
+  <div>
+    <div class="demo-card">
+      <div class="demo-header">
+        <div class="demo-dots">
+          <div class="demo-dot" style="background:#ff5f57"></div>
+          <div class="demo-dot" style="background:#febc2e"></div>
+          <div class="demo-dot" style="background:#28c840"></div>
+        </div>
+        <div class="demo-title">Try it live</div>
+        <div class="demo-badge">Live Demo</div>
+      </div>
+      <textarea class="demo-textarea" id="demoText" placeholder="Type or paste your text here to see instant stats…">The quick brown fox jumps over the lazy dog. This simple sentence has been used for decades to test typefaces and keyboards. It contains every letter of the English alphabet at least once.</textarea>
+      <div class="demo-stats">
+        <div class="demo-stat">
+          <div class="ds-val" id="dWords" style="color:var(--lav)">0</div>
+          <div class="ds-label">Words</div>
+        </div>
+        <div class="demo-stat">
+          <div class="ds-val" id="dChars" style="color:var(--amber)">0</div>
+          <div class="ds-label">Characters</div>
+        </div>
+        <div class="demo-stat">
+          <div class="ds-val" id="dSentences" style="color:var(--mint)">0</div>
+          <div class="ds-label">Sentences</div>
+        </div>
+        <div class="demo-stat">
+          <div class="ds-val" id="dRead" style="color:var(--lav)">0</div>
+          <div class="ds-label">Read min</div>
+        </div>
+      </div>
+      <div class="demo-readability">
+        <div style="font-size:10px;color:var(--dim);white-space:nowrap">Readability</div>
+        <div class="read-bar-bg"><div class="read-bar-fill" id="dReadBar" style="width:0%"></div></div>
+        <div class="read-label" id="dReadLabel" style="color:var(--lav)">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-n">6</div><div class="stat-l">Stats per analysis</div></div>
+    <div class="stat-item"><div class="stat-n">0ms</div><div class="stat-l">Delay — instant results</div></div>
+    <div class="stat-item"><div class="stat-n">100%</div><div class="stat-l">Private — runs on-device</div></div>
+    <div class="stat-item"><div class="stat-n">Free</div><div class="stat-l">Core features forever</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-head">
+    <div class="eyebrow">What you get</div>
+    <h2 class="section-h2">Every stat a writer needs</h2>
+    <p class="section-sub">From basic word count to advanced readability analysis — all in one click.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-icon">⚡</div>
+      <h3>Instant Selection Stats</h3>
+      <p>Highlight any text on any webpage — a floating tooltip shows words, characters, sentences, and reading time instantly.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📖</div>
+      <h3>Readability Score</h3>
+      <p>Flesch-Kincaid readability analysis tells you if your writing is too complex for your audience — from Very Easy to Very Difficult.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔍</div>
+      <h3>SEO Keyword Density</h3>
+      <p>See which words appear most often and their percentage. Perfect for optimizing content without keyword stuffing.</p>
+      <span class="pro-tag">PRO</span>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🎯</div>
+      <h3>Daily Word Goal</h3>
+      <p>Set a daily writing target and track your progress with a visual progress bar. Build a consistent writing habit.</p>
+      <span class="pro-tag">PRO</span>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">⬇️</div>
+      <h3>Export Stats</h3>
+      <p>Copy stats to clipboard or download as CSV. Perfect for tracking content performance over time or reporting to clients.</p>
+      <span class="pro-tag">PRO</span>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📋</div>
+      <h3>Paste & Analyze</h3>
+      <p>Paste any text directly into the extension to analyze it — no need to be on a specific webpage. Works anywhere.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section class="section" id="compare">
+  <div class="section-head">
+    <div class="eyebrow">Why WordCount Pro</div>
+    <h2 class="section-h2">Beyond basic word counting</h2>
+    <p class="section-sub">Other word counters stop at numbers. WordCount Pro gives you insight.</p>
+  </div>
+  <div class="compare-grid">
+    <div class="compare-card ours">
+      <div class="compare-title">📝 WordCount Pro</div>
+      <ul class="compare-list">
+        <li><span class="ck">✓</span> Words, chars, sentences, paragraphs in one click</li>
+        <li><span class="ck">✓</span> Flesch-Kincaid readability score per selection</li>
+        <li><span class="ck">✓</span> SEO keyword density analysis — top 5 keywords</li>
+        <li><span class="ck">✓</span> Daily word goal with progress tracking</li>
+        <li><span class="ck">✓</span> Export stats as CSV or copy to clipboard</li>
+        <li><span class="ck">✓</span> History of past 20 analyses</li>
+        <li><span class="ck">✓</span> Dark & light mode UI</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <div class="compare-title" style="color:var(--dim);padding-top:10px">Other Word Counters</div>
+      <ul class="compare-list">
+        <li><span class="ck">✓</span> Word and character count</li>
+        <li><span class="cx">✗</span> <span style="color:var(--dim)">No readability analysis</span></li>
+        <li><span class="cx">✗</span> <span style="color:var(--dim)">No SEO keyword density</span></li>
+        <li><span class="cx">✗</span> <span style="color:var(--dim)">No word goals or tracking</span></li>
+        <li><span class="cx">✗</span> <span style="color:var(--dim)">No export functionality</span></li>
+        <li><span class="cx">✗</span> <span style="color:var(--dim)">No history</span></li>
+        <li><span class="cx">✗</span> <span style="color:var(--dim)">Basic UI, dark mode only</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="section-head">
+    <div class="eyebrow">Pricing</div>
+    <h2 class="section-h2">Free forever.<br>Pro when you need more.</h2>
+    <p class="section-sub">Start free, upgrade when your writing gets serious.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0</div>
+      <div class="plan-period">forever</div>
+      <ul class="plan-features">
+        <li><span class="ck">✓</span> Instant selection stats</li>
+        <li><span class="ck">✓</span> Full page analysis</li>
+        <li><span class="ck">✓</span> Paste & analyze</li>
+        <li><span class="ck">✓</span> Readability score</li>
+        <li><span class="ck">✓</span> History (20 entries)</li>
+        <li><span class="dim-ck" style="color:var(--dim)">—</span> <span style="color:var(--dim)">SEO keyword density (Pro)</span></li>
+        <li><span class="dim-ck" style="color:var(--dim)">—</span> <span style="color:var(--dim)">Word goals (Pro)</span></li>
+        <li><span class="dim-ck" style="color:var(--dim)">—</span> <span style="color:var(--dim)">Export CSV (Pro)</span></li>
+      </ul>
+      <a href="https://chromewebstore.google.com" target="_blank" class="plan-btn free-btn">Add to Chrome Free</a>
+    </div>
+    <div class="plan pro">
+      <div class="plan-badge">MOST POPULAR</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$3.99</div>
+      <div class="plan-period">per month · cancel anytime</div>
+      <ul class="plan-features">
+        <li><span class="ck">✓</span> Everything in Free</li>
+        <li><span class="ck">✓</span> SEO keyword density analysis</li>
+        <li><span class="ck">✓</span> Daily word goal tracking</li>
+        <li><span class="ck">✓</span> Export stats (CSV + clipboard)</li>
+        <li><span class="ck">✓</span> Speaking time estimate</li>
+        <li><span class="ck">✓</span> Unique word count</li>
+        <li><span class="ck">✓</span> Priority support</li>
+      </ul>
+      <a href="https://buy.polar.sh/polar_cl_Fj1TlOuy2xJyURQshM77xuMb2HK574Otka9Pm3KKaa8" target="_blank" class="plan-btn pro-btn">Start 7-day Free Trial</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="cta-card">
+    <h2>Write with <span class="grad">more confidence.</span></h2>
+    <p>Join writers, bloggers, and SEO professionals who use WordCount Pro to analyze and improve their writing every day.</p>
+    <div class="cta-actions">
+      <a href="https://chromewebstore.google.com" target="_blank" class="btn-primary">📝 Add to Chrome — Free</a>
+      <a href="https://buy.polar.sh/polar_cl_Fj1TlOuy2xJyURQshM77xuMb2HK574Otka9Pm3KKaa8" target="_blank" class="btn-ghost">Start Pro Trial</a>
+    </div>
+    <div class="cta-note">Free forever · No credit card · Cancel Pro anytime</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <div class="logo-icon" style="width:24px;height:24px;border-radius:6px;font-size:12px">📝</div>
+    WordCount Pro
+  </div>
+  <div class="footer-links">
+    <a href="https://clingogo.com">Clingogo</a>
+    <a href="https://clingogo.com/privacy.html">Privacy</a>
+    <a href="https://clingogo.com/terms.html">Terms</a>
+    <a href="mailto:support@clingogo.com">Support</a>
+  </div>
+  <div class="footer-copy">© 2026 Clingogo · Do Viet Quang</div>
+</footer>
+
+<script>
+// Live demo analyzer
+function analyze(text) {
+  const t = text.trim();
+  if (!t) return { words: 0, chars: 0, sentences: 0, readTime: 0, flesch: 0, label: '—', color: '#6b7280' };
+  const words = t.split(/\s+/).filter(w => w.length > 0).length;
+  const chars = t.length;
+  const sentences = t.split(/[.!?]+/).filter(s => s.trim().length > 0).length || 1;
+  const readTime = Math.max(1, Math.round(words / 200));
+  const avgWPS = words / sentences;
+  const flesch = Math.max(0, Math.min(100, Math.round(206.835 - 1.015 * avgWPS - 84.6 * 1.5)));
+  const { label, color } = flesch >= 80 ? { label: 'Easy', color: '#4ade80' }
+    : flesch >= 60 ? { label: 'Standard', color: '#fbbf24' }
+    : flesch >= 40 ? { label: 'Difficult', color: '#fb923c' }
+    : { label: 'Very Difficult', color: '#f87171' };
+  return { words, chars, sentences, readTime, flesch, label, color };
+}
+
+function updateDemo() {
+  const text = document.getElementById('demoText').value;
+  const s = analyze(text);
+  document.getElementById('dWords').textContent = s.words.toLocaleString();
+  document.getElementById('dChars').textContent = s.chars.toLocaleString();
+  document.getElementById('dSentences').textContent = s.sentences.toLocaleString();
+  document.getElementById('dRead').textContent = s.readTime;
+  document.getElementById('dReadBar').style.width = s.flesch + '%';
+  document.getElementById('dReadBar').style.background = s.color;
+  document.getElementById('dReadLabel').textContent = s.label;
+  document.getElementById('dReadLabel').style.color = s.color;
+}
+
+document.getElementById('demoText').addEventListener('input', updateDemo);
+updateDemo(); // run on load
+</script>
+</body>
+</html>
